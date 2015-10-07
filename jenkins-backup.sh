@@ -6,6 +6,16 @@ function usage(){
 }
 ##################################################################################
 
+function SetIFSToNewline {
+        IFS_ORG=$IFS
+        IFS="
+        "
+}
+
+function RestoreIFSToOriginal {
+        IFS=$IFS_ORG
+}
+
 readonly JENKINS_HOME=$1
 readonly DEST_FILE=$2
 readonly CUR_DIR=$(cd $(dirname ${BASH_SOURCE:-$0}); pwd)
@@ -41,10 +51,12 @@ fi
 
 if [ -d "$JENKINS_HOME/jobs/" ] ; then
   cd "$JENKINS_HOME/jobs/"
+  SetIFSToNewline
   ls -1 | while read job_name ; do
     mkdir -p "$ARC_DIR/jobs/$job_name/"
     find "$JENKINS_HOME/jobs/$job_name/" -maxdepth 1 -name "*.xml" | xargs -I {} cp {} "$ARC_DIR/jobs/$job_name/"
   done
+  RestoreIFSToOriginal
 fi
 
 cd "$TMP_DIR"
